@@ -1,0 +1,47 @@
+{
+    "name": "HanziReader",
+    "description": "Chinese reader with word coloring to mark known/learning/unknown.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": ["storage", "tabs", "contextMenus"],
+    "host_permissions": [
+        "http://*/*", "https://*/*", "https://leetcode.com/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["http://*/*", "https://*/*", "https://leetcode.com/*"],
+            "js": ["tools.js", "content.js", "highlighter.js"],
+            "css": ["content.css", "highlighter.css"]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "/assets/icon128.png",
+                "/assets/lln_words.json",
+                "/assets/hsk.json",
+                "/assets/hskall.csv",
+                "/assets/words_i_know.txt"
+            ],
+            "matches": ["http://*/*", "https://*/*", "https://leetcode.com/*"]
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "/assets/icon128.png",
+            "32": "/assets/icon128.png",
+            "48": "/assets/icon128.png",
+            "128": "/assets/icon128.png"
+        }
+    },
+    "icons": {
+        "16": "/assets/icon128.png",
+        "32": "/assets/icon128.png",
+        "48": "/assets/icon128.png",
+        "128": "/assets/icon128.png"
+    }
+}
