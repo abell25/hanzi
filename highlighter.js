@@ -5,26 +5,36 @@ function initHighlighter() {
 
 
 function highlightKnownWords() {
-    var knownWords = ['有', '个', '到']
+    var knownWords = ['有', '个', '到', '学习']
     var vocabTrie = createTrie(knownWords)
-    for(const textNode of getTextNodes()) {
+    var allTextNodes = getTextNodes()
+    for (const textNode of allTextNodes) {
         const words = textNode.nodeValue
-        for (const word of words) {
+        console.log('words: ', words, 'tokenized: ', tokenize(words).join('-'))
+        const tokenizedWords = tokenize(words)
+        let spans = []
+        for (const word of tokenizedWords) {
+            // console.log('word: ', word)
+            const highlightedWord = document.createElement('span');
+            highlightedWord.textContent = word.trim();
+            highlightedWord.classList.add('highlighted')
             if (knownWords.includes(word)) {
                 // Create a new span element with the highlighted word
-                const highlightedWord = document.createElement('span');
                 highlightedWord.style.backgroundColor = 'yellow';
-                highlightedWord.textContent = word;
-
-                // Replace the original word with the highlighted word
-                const startOffset = textNode.textContent.indexOf(word);
-                if (startOffset > -1) {
-                    const range = document.createRange();
-                    range.setStart(textNode, startOffset);
-                    range.setEnd(textNode, startOffset + word.length);
-                    range.deleteContents();
-                    range.insertNode(highlightedWord);
-                }
+            } 
+            spans.push(highlightedWord)
+            // Replace the original word with the highlighted word
+        }
+        const highlightedWords = spans.map(x => x.innerHTML).join('');
+        textNode.nodeValue = highlightedWords;
+        const startOffset = textNode.textContent.indexOf(words);
+        if (startOffset > -1) {
+            const range = document.createRange();
+            range.setStart(textNode, startOffset);
+            range.setEnd(textNode, startOffset + words.length);
+            range.deleteContents();
+            for (const span of spans.reverse()) {
+                range.insertNode(span);
             }
         }
     }

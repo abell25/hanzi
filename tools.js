@@ -95,6 +95,11 @@ function getLongestTrieMatch(trie, chars) {
 }
 
 //////////////////////////////////////// searching page ////////////////////////////////////////
+function isChineseCharacter(char) {
+    const chineseCharRegex = /[\u4e00-\u9fff]/;
+    return chineseCharRegex.test(char);
+  }
+
 function getTextNodes() {
     const walker = document.createTreeWalker(
       document.body,
@@ -111,6 +116,44 @@ function getTextNodes() {
         }
     }
     return textNodes
+}
+//////////////////////////////////////// tokenization ////////////////////////////////////////
+function tokenize(textStr) {
+    return (tokenizeChinese(textStr)[0] ?? []).filter(x => x.trim().length > 0)
+}
+function tokenizeChinese(textStr, maxLen=3, depth=0) {
+    if (textStr.length == 0) return [[], 1]
+    if (textStr.length == 1) return [[textStr], wordFreqs[textStr] ?? 1]
+    
+    if (!isChineseCharacter(textStr.slice(0, 1))) {
+        for(let i=1; i<textStr.length; i++) {
+            if (isChineseCharacter(textStr.slice(i, i+1))) {
+                let [tokensRest, freqRest] = tokenizeChinese(textStr.slice(i), maxLen, depth+1);
+                return [[textStr.slice(0, i), ...tokensRest], 1 + freqRest];
+            }
+        }
+    }
+    
+    let results = Array.from({length: maxLen}, (_, i) => i+1)
+        .reverse()
+        .filter(i => wordFreqs[textStr.slice(0, i)])
+        .map(i => {
+            let word = textStr.slice(0, i);
+            let freq = wordFreqs[word];
+            //console.log(`word: ${word}, freq: ${freq}`)
+            let textStrRest = textStr.slice(i);
+            let [tokensRest, freqRest] = tokenizeChinese(textStrRest, maxLen, depth+1);
+            return [[word, ...tokensRest], freq + freqRest];
+        })
+        // DEFAULT IS MAX LENGTH
+        //.sort((a, b) => b[1] - a[1]) 
+    
+    // If results is empty, then current char is not in the dictionary.
+    if (results.length == 0) {
+        return [[textStr.slice(0, 1), ...tokenizeChinese(textStr.slice(1), maxLen, depth+1)[0]], 1]
+    }
+    return results[0] ?? [[], 1]
+
 }
 
 (() => {
